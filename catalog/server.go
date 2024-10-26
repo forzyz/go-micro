@@ -23,8 +23,7 @@ func ListenGRPC(s Service, port int) error {
 	}
 	serv := grpc.NewServer()
 	pb.RegisterCatalogServiceServer(serv, &grpcServer{
-		service:                           s,
-		UnimplementedCatalogServiceServer: pb.UnimplementedCatalogServiceServer{},
+		service: s,
 	})
 	reflection.Register(serv)
 	return serv.Serve(lis)
@@ -74,6 +73,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 		log.Println(err)
 		return nil, err
 	}
+	
 	products := []*pb.Product{}
 	for _, p := range res {
 		products = append(products, &pb.Product{

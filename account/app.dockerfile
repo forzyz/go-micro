@@ -1,5 +1,5 @@
 # Use a recent Go version and Alpine base image
-FROM golang:1.23.2-alpine3.18 AS build
+FROM golang:1.23-alpine AS build
 
 # Install necessary packages
 RUN apk --no-cache add gcc g++ make ca-certificates
@@ -32,4 +32,4 @@ COPY --from=build /go/bin/app .
 EXPOSE 8080
 
 # Set the command to run the application
-CMD ["app"]
+CMD ["./app"]

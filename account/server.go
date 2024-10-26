@@ -34,6 +34,7 @@ func (s *grpcServer) PostAccount(ctx context.Context, r *pb.PostAccountRequest) 
 	if err != nil {
 		return nil, err
 	}
+
 	return &pb.PostAccountResponse{Account: &pb.Account{
 		Id:   acc.ID,
 		Name: acc.Name,
@@ -56,6 +57,7 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 	if err != nil {
 		return nil, err
 	}
+
 	accounts := []*pb.Account{}
 	for _, p := range res {
 		accounts = append(
@@ -66,5 +68,6 @@ func (s *grpcServer) GetAccounts(ctx context.Context, r *pb.GetAccountsRequest) 
 			},
 		)
 	}
+
 	return &pb.GetAccountsResponse{Accounts: accounts}, nil
 }

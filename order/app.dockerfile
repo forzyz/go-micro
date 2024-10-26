@@ -1,5 +1,5 @@
 # Use a recent Go version and Alpine base image
-FROM golang:1.23.2-alpine3.18 AS build
+FROM golang:1.23-alpine AS build
 
 # Install necessary packages
 RUN apk --no-cache add gcc g++ make ca-certificates
@@ -13,12 +13,12 @@ COPY go.mod go.sum ./
 # Copy the vendor directory
 COPY vendor vendor
 
-# Copy the catalog source code
+# Copy the source code for all services
 COPY account account
 COPY catalog catalog
 COPY order order
 
-# Build the Go application
+# Build the Go application (adjust the command if you are building a specific service)
 RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order
 
 # Use a minimal Alpine image for the final stage
@@ -34,4 +34,4 @@ COPY --from=build /go/bin/app .
 EXPOSE 8080
 
 # Set the command to run the application
-CMD ["app"]
+CMD ["./app"]

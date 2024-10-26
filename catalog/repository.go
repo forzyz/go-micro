@@ -94,6 +94,7 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip uint64, take 
 		log.Println(err)
 		return nil, err
 	}
+	
 	products := []Product{}
 	for _, hit := range res.Hits.Hits {
 		p := productDocument{}
@@ -106,6 +107,7 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip uint64, take 
 			})
 		}
 	}
+
 	return products, err
 }
 
@@ -156,7 +158,7 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 	products := []Product{}
 	for _, hit := range res.Hits.Hits {
 		p := productDocument{}
-		if err = json.Unmarshal(hit.Source, &p); err != nil {
+		if err = json.Unmarshal(hit.Source, &p); err == nil {
 			products = append(products, Product{
 				ID:          hit.Id,
 				Name:        p.Name,
@@ -165,5 +167,6 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 			})
 		}
 	}
+
 	return products, err
 }

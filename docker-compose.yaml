@@ -1,8 +1,90 @@
+version: "3.7"
+
 services:
   account:
+    build:
+      context: .
+      dockerfile: ./account/app.dockerfile
+    depends_on:
+      - account_db
+    environment:
+      DATABASE_URL: postgres://forzyz:2323@account_db:5432/forzyz_db?sslmode=disable
+    ports:
+      - "8081:8080" # Expose account service port for internal and external use
+    restart: on-failure
+
   catalog:
+    build:
+      context: .
+      dockerfile: ./catalog/app.dockerfile
+    depends_on:
+      - catalog_db
+    environment:
+      DATABASE_URL: http://catalog_db:9200
+    ports:
+      - "8082:8080" # Expose catalog service port for internal and external use
+    restart: on-failure
+
   order:
+    build:
+      context: .
+      dockerfile: ./order/app.dockerfile
+    depends_on:
+      - order_db
+    environment:
+      DATABASE_URL: postgres://forzyz:2323@order_db:5432/forzyz_db?sslmode=disable
+      ACCOUNT_SERVICE_URL: account:8080 # Use internal Docker network address
+      CATALOG_SERVICE_URL: catalog:8080 # Use internal Docker network address
+    ports:
+      - "8083:8080" # Expose order service port for internal and external use
+    restart: on-failure
+
   graphql:
+    build:
+      context: .
+      dockerfile: ./graphql/app.dockerfile
+    ports:
+      - "8000:8080" # External access to GraphQL
+    depends_on:
+      - account
+      - catalog
+    environment:
+      ACCOUNT_SERVICE_URL: account:8080 # Use internal Docker network address
+      CATALOG_SERVICE_URL: catalog:8080 # Use internal Docker network address
+      ORDER_SERVICE_URL: order:8080 # Use internal Docker network address
+    restart: on-failure
+
   account_db:
+    build:
+      context: ./account
+      dockerfile: ./db.dockerfile
+    environment:
+      POSTGRES_DB: forzyz_db
+      POSTGRES_USER: forzyz
+      POSTGRES_PASSWORD: 2323
+    ports:
+      - "5433:5432" # Expose PostgreSQL port on host to avoid conflict
+    volumes:
+      - ./account/up.sql:/docker-entrypoint-initdb.d/up.sql # Mount the SQL file
+    restart: unless-stopped
+
   catalog_db:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    environment:
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      discovery.type: single-node
+    ports:
+      - "9200:9200" # Expose Elasticsearch port
+    restart: unless-stopped
+
   order_db:
+    build:
+      context: ./order
+      dockerfile: ./db.dockerfile
+    environment:
+      POSTGRES_DB: forzyz_db
+      POSTGRES_USER: forzyz
+      POSTGRES_PASSWORD: 2323
+    ports:
+      - "5434:5432" # Expose PostgreSQL port on host to avoid conflict
+    restart: unless-stopped

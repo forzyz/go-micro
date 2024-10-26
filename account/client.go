@@ -64,12 +64,14 @@ func (c *Client) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]A
 	if err != nil {
 		return nil, err
 	}
+
 	accounts := []Account{}
 	for _, a := range r.Accounts {
 		accounts = append(accounts, Account{
 			ID:   a.Id,
-			Name: a.Name,
+			Name: a.Name,	
 		})
 	}
+
 	return accounts, nil
 }
